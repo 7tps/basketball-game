@@ -1,0 +1,63 @@
+###############################################
+# Unity Project .gitattributes
+# Recommended settings for Git + Git LFS
+###############################################
+
+# Normalize line endings for all text files
+* text=auto
+
+# Unity-specific binary assets — use Git LFS
+*.unity      filter=lfs diff=lfs merge=lfs -text
+*.prefab     filter=lfs diff=lfs merge=lfs -text
+*.mat        filter=lfs diff=lfs merge=lfs -text
+*.asset      filter=lfs diff=lfs merge=lfs -text
+*.anim       filter=lfs diff=lfs merge=lfs -text
+*.controller filter=lfs diff=lfs merge=lfs -text
+
+# Image assets
+*.png        filter=lfs diff=lfs merge=lfs -text
+*.jpg        filter=lfs diff=lfs merge=lfs -text
+*.jpeg       filter=lfs diff=lfs merge=lfs -text
+*.psd        filter=lfs diff=lfs merge=lfs -text
+*.tga        filter=lfs diff=lfs merge=lfs -text
+*.gif        filter=lfs diff=lfs merge=lfs -text
+
+# Audio assets
+*.wav        filter=lfs diff=lfs merge=lfs -text
+*.mp3        filter=lfs diff=lfs merge=lfs -text
+*.ogg        filter=lfs diff=lfs merge=lfs -text
+
+# Video files
+*.mp4        filter=lfs diff=lfs merge=lfs -text
+*.mov        filter=lfs diff=lfs merge=lfs -text
+
+# 3D Models
+*.fbx        filter=lfs diff=lfs merge=lfs -text
+*.obj        filter=lfs diff=lfs merge=lfs -text
+*.blend      filter=lfs diff=lfs merge=lfs -text
+
+# Shader files (treat as text for merging)
+*.shader     text
+*.cginc      text
+
+# Scripts and config — treat as text
+*.cs         text
+*.js         text
+*.boo        text
+*.json       text
+*.xml        text
+*.yml        text
+*.yaml       text
+*.txt        text
+*.asmdef     text
+*.rsp        text
+
+# Misc
+*.dll        binary
+*.exe        binary
+
+# Prevent these from being automatically normalized
+*.ico        -text
+*.pdf        -text
+*.zip        -text
+*.tar.gz     -text
