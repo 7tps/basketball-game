@@ -4,10 +4,16 @@ using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("References")]
+    public GameManager gameManager;
     private Rigidbody2D rb;
     public Slider shotMeter;
     public RectTransform shotMeterTransform;
-    public Camera mainCamera;
+    public Camera mainCamera; 
+    public Ball ball;
+
+    [Header("Index")] 
+    public int playerIndex = -1;
     
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
@@ -18,19 +24,19 @@ public class PlayerController : MonoBehaviour
     public float chargeSpeed = 1f; //suggestion: half of move speed
     private bool isShotMeterActive = false;
     private float timeToDisplay = .5f;
-    private float meterTimer = 0f;
-    private bool frozen = false;
+    public float meterTimer = 0f;
+    public bool frozen = false;
 
     [Header("Yellow and Green Windows")] 
     public RectTransform background;
     public RectTransform yellow;
     public RectTransform green;
     [Range(0f, 1f)]
-    public float yellowHeightMultiplier = 0.4f; // Height of yellow window as fraction of background
+    public float yellowHeightMultiplier = 0.4f; // height of yellow window as fraction of background
     [Range(0f, 1f)]
-    public float greenHeightMultiplier = 0.15f; // Height of green window as fraction of background
+    public float greenHeightMultiplier = 0.15f; // height of green window as fraction of background
     [Range(0f, 1f)]
-    public float windowOffset = 0f; // Offset of yellow and green windows as a percentage of height, starts from halfway up the slider
+    public float windowOffset = 0f; // offset of yellow and green windows as a percentage of height, starts from halfway up the slider
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -57,13 +63,15 @@ public class PlayerController : MonoBehaviour
     
     void FixedUpdate()
     {
+        if (playerIndex < 0) {return;} //ensure index is initialized
+        
         //movement
         float horizontal = Input.GetAxis("Horizontal"); 
         float vertical = Input.GetAxis("Vertical");     
         
         if (rb != null)
         {
-            if (!isShotMeterActive)
+            if (!frozen)
             {
                 Vector2 movement = new Vector2(horizontal, vertical) * moveSpeed;
                 rb.linearVelocity = new Vector2(movement.x, movement.y);
@@ -81,6 +89,8 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (playerIndex < 0) {return;} //ensure index is initialized
+        
         //shot meter position
         if (shotMeterTransform != null && mainCamera != null)
         {
@@ -94,39 +104,74 @@ public class PlayerController : MonoBehaviour
         //shot meter logic
         if (shotMeter != null)
         {
-            if (!frozen)
+            if (ball.InPossession(playerIndex))
             {
-                if (Input.GetKey(KeyCode.Space))
+                if (!frozen)
                 {
-                    shotMeter.gameObject.SetActive(true);
-                    SetShotWindows();
-                    isShotMeterActive = true;
-                    shotMeter.value += chargeSpeed * Time.deltaTime;
-                
-                    shotMeter.value = Mathf.Clamp(shotMeter.value, shotMeter.minValue, shotMeter.maxValue);
-                }
-                else if (Input.GetKeyUp(KeyCode.Space))
-                {
-                    meterTimer = timeToDisplay;
-                    frozen = true;
+                    if (Input.GetKey(KeyCode.Space))
+                    {
+                        shotMeter.gameObject.SetActive(true);
+                        SetShotWindows();
+                        isShotMeterActive = true;
+                        frozen = true;
+                        shotMeter.value += chargeSpeed * Time.deltaTime;
+                    
+                        shotMeter.value = Mathf.Clamp(shotMeter.value, shotMeter.minValue, shotMeter.maxValue);
+                    }
+                    else if (Input.GetKeyUp(KeyCode.Space))
+                    {
+                        meterTimer = timeToDisplay;
+                        ball.Shoot();
+                        frozen = false;
+                    }
+                    else
+                    {
+                        shotMeter.value = shotMeter.minValue;
+                        shotMeter.gameObject.SetActive(false);
+                        isShotMeterActive = false;
+                        ResetShotWindows();
+                    }
                 }
                 else
+                {
+                    if (Input.GetKey(KeyCode.Space))
+                    {
+                        shotMeter.gameObject.SetActive(true);
+                        shotMeter.value += chargeSpeed * Time.deltaTime;
+                        shotMeter.value = Mathf.Clamp(shotMeter.value, shotMeter.minValue, shotMeter.maxValue);
+                    }
+                    else if (Input.GetKeyUp(KeyCode.Space))
+                    {
+                        meterTimer = timeToDisplay;
+                        ball.Shoot();
+                        frozen = false;
+                    }
+                    else
+                    {
+                        meterTimer -= Time.deltaTime;
+                        if (meterTimer <= 0)
+                        {
+                            shotMeter.value = shotMeter.minValue;
+                            shotMeter.gameObject.SetActive(false);
+                            isShotMeterActive = false;
+                            ResetShotWindows();
+                            frozen = false;
+                        }
+                    }
+                }
+            }
+            else if (isShotMeterActive)
+            {
+                meterTimer -= Time.deltaTime;
+                if (meterTimer <= 0)
                 {
                     shotMeter.value = shotMeter.minValue;
                     shotMeter.gameObject.SetActive(false);
                     isShotMeterActive = false;
                     ResetShotWindows();
-                }
-            }
-            else
-            {
-                meterTimer -= Time.deltaTime;
-                if (meterTimer <= 0)
-                {
                     frozen = false;
                 }
             }
-            
         }
     }
 
