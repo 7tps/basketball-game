@@ -29,6 +29,8 @@ public class Ball : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
+        
         rb = GetComponent<Rigidbody2D>();
         if (rb == null)
         {
@@ -62,11 +64,11 @@ public class Ball : MonoBehaviour
         return index == playerIndex;
     }
     
-    public void Possess(int index, Transform player)
+    public void Possess(int index)
     {
         inPossession = true;
         playerIndex = index;
-        playerTransform = player;
+        playerTransform = GameManager.instance.GetPlayerByIndex(index).transform;
         
         if (rb != null)
         {
@@ -153,5 +155,16 @@ public class Ball : MonoBehaviour
         }
         
         rb.linearVelocity = initialVelocity;
+    }
+    
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (gameManager != null && gameManager.activeHoop != null)
+        {
+            if (other == gameManager.activeHoop)
+            {
+                gameManager.Scored();
+            }
+        }
     }
 }
